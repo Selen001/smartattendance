@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard - MET Smart Attendance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #0f172a;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.03);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .input-dark {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .input-dark:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .tab-active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .tab-inactive {
+            color: #64748b;
+        }
+
+        .tab-inactive:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-white">
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="sidebar w-64 min-h-screen p-6 fixed left-0 top-0">
+            <div class="flex items-center space-x-3 mb-10">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-lg">
+                    M</div>
+                <div>
+                    <h2 class="font-bold text-sm">MET Institute</h2>
+                    <p class="text-xs text-gray-500">Super Admin</p>
+                </div>
+            </div>
+            <nav class="space-y-1">
+                <button onclick="showSection('overview')"
+                    class="w-full text-left px-4 py-3 rounded-xl bg-blue-500/20 text-blue-400 font-medium text-sm flex items-center space-x-3"
+                    id="nav-overview">
+                    <span>&#9632;</span><span>Overview</span>
+                </button>
+                <button onclick="showSection('departments')"
+                    class="w-full text-left px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm flex items-center space-x-3"
+                    id="nav-departments">
+                    <span>&#9632;</span><span>Departments</span>
+                </button>
+                <button onclick="showSection('users')"
+                    class="w-full text-left px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm flex items-center space-x-3"
+                    id="nav-users">
+                    <span>&#9632;</span><span>User Management</span>
+                </button>
+                <button onclick="showSection('pricing')"
+                    class="w-full text-left px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 text-sm flex items-center space-x-3"
+                    id="nav-pricing">
+                    <span>&#9632;</span><span>Pricing Tiers</span>
+                </button>
+            </nav>
+            <div class="absolute bottom-6 left-6 right-6">
+                <button onclick="logout()"
+                    class="w-full px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 text-sm">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="ml-64 flex-1 p-8">
+            <!-- Overview Section -->
+            <div id="section-overview" class="section-content">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold">Administrator Dashboard</h1>
+                        <p class="text-gray-400 text-sm mt-1">Full management control over the MET Smart Attendance
+                            System</p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="refreshData()"
+                            class="px-4 py-2 rounded-xl bg-white/5 text-gray-300 text-sm hover:bg-white/10">Refresh</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="stat-card rounded-2xl p-6">
+                        <p class="text-gray-400 text-sm">Total Students</p>
+                        <p class="text-3xl font-bold mt-2" id="totalStudents">-</p>
+                    </div>
+                    <div class="stat-card rounded-2xl p-6">
+                        <p class="text-gray-400 text-sm">Faculty Members</p>
+                        <p class="text-3xl font-bold mt-2" id="totalFaculty">-</p>
+                    </div>
+                    <div class="stat-card rounded-2xl p-6">
+                        <p class="text-gray-400 text-sm">Departments</p>
+                        <p class="text-3xl font-bold mt-2" id="totalDepartments">-</p>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="font-semibold mb-4">Quick Actions</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <button onclick="showSection('users')"
+                            class="p-4 rounded-xl bg-white/5 hover:bg-white/10 text-center text-sm">+ Create Faculty
+                            Head</button>
+                        <button onclick="showSection('users')"
+                            class="p-4 rounded-xl bg-white/5 hover:bg-white/10 text-center text-sm">+ Add
+                            Student</button>
+                        <button onclick="showSection('departments')"
+                            class="p-4 rounded-xl bg-white/5 hover:bg-white/10 text-center text-sm">View
+                            Departments</button>
+                        <button onclick="showSection('pricing')"
+                            class="p-4 rounded-xl bg-white/5 hover:bg-white/10 text-center text-sm">View
+                            Pricing</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Departments Section -->
+            <div id="section-departments" class="section-content hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold">Departments & Courses</h1>
+                        <p class="text-gray-400 text-sm mt-1">MET Institute institutional layout</p>
+                    </div>
+                </div>
+                <div id="departmentsList" class="space-y-6">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="section-users" class="section-content hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold">User Management</h1>
+                        <p class="text-gray-400 text-sm mt-1">Create and manage system users</p>
+                    </div>
+                    <button onclick="showCreateUserModal()"
+                        class="btn-primary px-6 py-2.5 rounded-xl text-white text-sm font-medium">+ Create User</button>
+                </div>
+
+                <div class="flex space-x-2 mb-6">
+                    <button class="tab-filter px-4 py-2 rounded-lg text-sm tab-active" data-role="FACULTY_HEAD"
+                        onclick="filterUsers('FACULTY_HEAD', this)">Faculty Heads</button>
+                    <button class="tab-filter px-4 py-2 rounded-lg text-sm tab-inactive" data-role="FACULTY_STAFF"
+                        onclick="filterUsers('FACULTY_STAFF', this)">Faculty Staff</button>
+                    <button class="tab-filter px-4 py-2 rounded-lg text-sm tab-inactive" data-role="STUDENT"
+                        onclick="filterUsers('STUDENT', this)">Students</button>
+                </div>
+
+                <div class="card overflow-hidden">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-white/10">
+                                <th class="text-left p-4 text-gray-400 text-sm font-medium">Name</th>
+                                <th class="text-left p-4 text-gray-400 text-sm font-medium">Email</th>
+                                <th class="text-left p-4 text-gray-400 text-sm font-medium">Department</th>
+                                <th class="text-left p-4 text-gray-400 text-sm font-medium">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pricing Section -->
+            <div id="section-pricing" class="section-content hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold">Pricing Tiers</h1>
+                        <p class="text-gray-400 text-sm mt-1">Subscription plans for the Smart Attendance SaaS</p>
+                    </div>
+                </div>
+                <div id="pricingContent" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create User Modal -->
+    <div id="createUserModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50"
+        style="backdrop-filter: blur(8px);">
+        <div
+            class="bg-slate-900 rounded-2xl p-8 w-full max-w-lg border border-white/10 mx-4 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold">Create New User</h3>
+                <button onclick="closeModal('createUserModal')"
+                    class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <form id="createUserForm" class="space-y-4">
+                <input type="hidden" id="cu_role" value="FACULTY_HEAD">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Full Name</label>
+                    <input type="text" id="cu_name" required
+                        class="input-dark w-full px-4 py-3 rounded-xl outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Email (@met.edu)</label>
+                    <input type="email" id="cu_email" required
+                        class="input-dark w-full px-4 py-3 rounded-xl outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Password</label>
+                    <input type="password" id="cu_password" required
+                        class="input-dark w-full px-4 py-3 rounded-xl outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Role</label>
+                    <select id="cu_role_select" onchange="document.getElementById('cu_role').value=this.value"
+                        class="input-dark w-full px-4 py-3 rounded-xl outline-none">
+                        <option value="FACULTY_HEAD">Faculty Head (HOD)</option>
+                        <option value="FACULTY_STAFF">Faculty Staff</option>
+                        <option value="STUDENT">Student</option>
+                    </select>
+                </div>
+                <div id="cu_department_div">
+                    <label class="block text-sm text-gray-400 mb-1">Department</label>
+                    <select id="cu_department" class="input-dark w-full px-4 py-3 rounded-xl outline-none">
+                        <option value="COMP_APP">Computer Application</option>
+                        <option value="BUS_ADMIN">Business Administration</option>
+                    </select>
+                </div>
+                <div id="cu_student_fields" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Course</label>
+                        <select id="cu_course" class="input-dark w-full px-4 py-3 rounded-xl outline-none">
+                            <option value="BCA">BCA</option>
+                            <option value="MCA">MCA</option>
+                            <option value="BBA">BBA</option>
+                            <option value="MBA">MBA</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Semester</label>
+                        <select id="cu_semester" class="input-dark w-full px-4 py-3 rounded-xl outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Roll Number (STU-XXXX-COURSE-XXXX)</label>
+                        <input type="text" id="cu_roll_number"
+                            class="input-dark w-full px-4 py-3 rounded-xl outline-none">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary w-full py-3 rounded-xl text-white font-medium text-sm">Create
+                    User</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        function logout() {
+            sessionStorage.removeItem('session_token');
+            sessionStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`section-${section}`).classList.remove('hidden');
+            document.querySelectorAll('[id^="nav-"]').forEach(n => {
+                n.classList.remove('bg-blue-500/20', 'text-blue-400');
+                n.classList.add('text-gray-400');
+            });
+            const nav = document.getElementById(`nav-${section}`);
+            if (nav) {
+                nav.classList.add('bg-blue-500/20', 'text-blue-400');
+                nav.classList.remove('text-gray-400');
+            }
+            if (section === 'overview') loadOverview();
+            if (section === 'departments') loadDepartments();
+            if (section === 'pricing') loadPricing();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).classList.remove('flex');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('flex');
+        }
+
+        document.getElementById('cu_role_select').addEventListener('change', function () {
+            const studentFields = document.getElementById('cu_student_fields');
+            if (this.value === 'STUDENT') {
+                studentFields.classList.remove('hidden');
+                updateSemesters();
+            } else {
+                studentFields.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('cu_course').addEventListener('change', updateSemesters);
+
+        function updateSemesters() {
+            const course = document.getElementById('cu_course').value;
+            const semesterSelect = document.getElementById('cu_semester');
+            semesterSelect.innerHTML = '';
+            const semesters = course === 'BCA' ? ['BCA_1', 'BCA_2', 'BCA_3', 'BCA_4', 'BCA_5', 'BCA_6']
+                : course === 'MCA' ? ['MCA_1', 'MCA_2', 'MCA_3', 'MCA_4']
+                    : course === 'BBA' ? ['BBA_1', 'BBA_2', 'BBA_3', 'BBA_4', 'BBA_5', 'BBA_6']
+                        : ['MBA_1', 'MBA_2', 'MBA_3', 'MBA_4'];
+            semesters.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s.replace('_', ' ');
+                semesterSelect.appendChild(opt);
+            });
+        }
+
+        document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('cu_name').value,
+                email: document.getElementById('cu_email').value,
+                password: document.getElementById('cu_password').value,
+                role: document.getElementById('cu_role').value,
+                department: document.getElementById('cu_department').value,
+            };
+            if (data.role === 'STUDENT') {
+                data.course = document.getElementById('cu_course').value;
+                data.semester = document.getElementById('cu_semester').value;
+                data.roll_number = document.getElementById('cu_roll_number').value;
+            }
+            try {
+                const res = await fetch('/api/users/create/', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert('User created successfully!');
+                    closeModal('createUserModal');
+                    filterUsers(document.querySelector('.tab-filter.tab-active')?.dataset?.role || 'FACULTY_HEAD');
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (err) {
+                alert('Network error');
+            }
+        });
+
+        function showCreateUserModal() {
+            document.getElementById('createUserForm').reset();
+            document.getElementById('cu_student_fields').classList.add('hidden');
+            openModal('createUserModal');
+        }
+
+        async function loadOverview() {
+            try {
+                const [studentsRes, facultyRes, deptRes] = await Promise.all([
+                    fetch('/api/users/?role=STUDENT'),
+                    fetch('/api/users/?role=FACULTY_HEAD'),
+                    fetch('/api/departments/'),
+                ]);
+                const students = await studentsRes.json();
+                const faculty = await facultyRes.json();
+                const depts = await deptRes.json();
+                document.getElementById('totalStudents').textContent = students.count || 0;
+                document.getElementById('totalFaculty').textContent = faculty.count || 0;
+                document.getElementById('totalDepartments').textContent = depts.departments?.length || 0;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadDepartments() {
+            const container = document.getElementById('departmentsList');
+            try {
+                const res = await fetch('/api/departments/');
+                const data = await res.json();
+                container.innerHTML = '';
+                if (data.departments) {
+                    data.departments.forEach(dept => {
+                        const div = document.createElement('div');
+                        div.className = 'card p-6';
+                        let coursesHtml = '';
+                        Object.entries(dept.courses || {}).forEach(([code, info]) => {
+                            coursesHtml += `<div class="mt-4 p-4 bg-white/5 rounded-xl">
+                                <p class="font-semibold text-sm">${code} - ${info.description}</p>
+                                <p class="text-gray-400 text-xs mt-1">Duration: ${info.duration_years} years | Semesters: ${info.semesters.join(', ')}</p>
+                            </div>`;
+                        });
+                        div.innerHTML = `<h3 class="text-lg font-bold">${dept.name} (${dept.code})</h3>${coursesHtml}`;
+                        container.appendChild(div);
+                    });
+                }
+            } catch (err) {
+                container.innerHTML = '<p class="text-red-400">Failed to load departments</p>';
+            }
+        }
+
+        async function filterUsers(role, btn) {
+            document.querySelectorAll('.tab-filter').forEach(t => {
+                t.classList.remove('tab-active');
+                t.classList.add('tab-inactive');
+            });
+            if (btn) {
+                btn.classList.remove('tab-inactive');
+                btn.classList.add('tab-active');
+            }
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-gray-500 text-center">Loading...</td></tr>';
+            try {
+                const res = await fetch(`/api/users/?role=${role}`);
+                const data = await res.json();
+                tbody.innerHTML = '';
+                if (data.users && data.users.length > 0) {
+                    data.users.forEach(u => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'border-b border-white/5 hover:bg-white/5';
+                        tr.innerHTML = `<td class="p-4 text-sm">${u.name || '-'}</td>
+                            <td class="p-4 text-sm text-gray-400">${u.email || '-'}</td>
+                            <td class="p-4 text-sm text-gray-400">${u.department || '-'}</td>
+                            <td class="p-4 text-sm"><span class="text-blue-400 text-xs">${u.role}</span></td>`;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-gray-500 text-center">No users found</td></tr>';
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-red-400 text-center">Failed to load users</td></tr>';
+            }
+        }
+
+        async function loadPricing() {
+            const container = document.getElementById('pricingContent');
+            try {
+                const res = await fetch('/api/pricing/');
+                const data = await res.json();
+                container.innerHTML = '';
+                Object.entries(data.pricing_tiers || {}).forEach(([tier, info]) => {
+                    const div = document.createElement('div');
+                    div.className = 'card p-6';
+                    div.innerHTML = `<h3 class="text-lg font-bold">${tier}</h3>
+                        <p class="text-3xl font-bold mt-2 text-blue-400">₹${info.price_per_student}<span class="text-sm text-gray-400">/student</span></p>
+                        <p class="text-gray-400 text-sm mt-1">Max: ${info.max_students} students</p>
+                        <ul class="mt-4 space-y-2">${info.features.map(f => `<li class="text-sm text-gray-300">&#10003; ${f}</li>`).join('')}</ul>`;
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                container.innerHTML = '<p class="text-red-400">Failed to load pricing</p>';
+            }
+        }
+
+        // Initialize
+        loadOverview();
+    </script>
+</body>
+
+</html>

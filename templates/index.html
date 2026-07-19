@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MET Institute of Management - Smart Attendance System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: #0a0f1e;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .glass-card-light {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .hero-glow {
+            text-shadow: 0 0 60px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 50px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-outline {
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s;
+        }
+
+        .btn-outline:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.15);
+            outline: none;
+        }
+
+        .achievement-card {
+            transition: all 0.4s;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-20px)
+            }
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-line {
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, transparent);
+            width: 120px;
+            margin: 0 auto;
+        }
+
+        .nav-link {
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #3b82f6;
+            transition: width 0.3s;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+        }
+
+        .error-toast {
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        .dept-card {
+            border-left: 3px solid #3b82f6;
+        }
+
+        .course-badge {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body class="text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-card border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-lg">
+                    M</div>
+                <span class="font-bold text-lg">MET Institute</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#home" class="nav-link text-sm text-gray-300 hover:text-white">Home</a>
+                <a href="#about" class="nav-link text-sm text-gray-300 hover:text-white">About</a>
+                <a href="#departments" class="nav-link text-sm text-gray-300 hover:text-white">Departments</a>
+                <a href="#achievements" class="nav-link text-sm text-gray-300 hover:text-white">Achievements</a>
+                <a href="#contact" class="nav-link text-sm text-gray-300 hover:text-white">Contact</a>
+                <button onclick="document.getElementById('loginModal').classList.remove('hidden')"
+                    class="btn-primary px-5 py-2 rounded-xl text-white text-sm font-medium">Staff / Student
+                    Login</button>
+            </div>
+            <button onclick="document.getElementById('loginModal').classList.remove('hidden')"
+                class="md:hidden btn-primary px-4 py-2 rounded-xl text-white text-sm">Login</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center relative overflow-hidden pt-20">
+        <div class="absolute inset-0 opacity-30">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full filter blur-[120px]"></div>
+            <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-500 rounded-full filter blur-[150px]"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 py-20 relative z-10">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div
+                        class="inline-flex items-center space-x-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-1.5 mb-6">
+                        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                        <span class="text-xs text-blue-300">Smart Attendance System v2.0</span>
+                    </div>
+                    <h1 class="text-4xl md:text-6xl font-black hero-glow leading-tight">
+                        MET Institute<br>
+                        <span class="gradient-text">of Management</span>
+                    </h1>
+                    <p class="text-gray-400 mt-6 text-lg leading-relaxed max-w-lg">
+                        Empowering education through cutting-edge facial recognition technology.
+                        The Department of Computer Application and Department of Business Administration,
+                        united in excellence.
+                    </p>
+                    <div class="flex flex-wrap gap-4 mt-8">
+                        <button onclick="document.getElementById('loginModal').classList.remove('hidden')"
+                            class="btn-primary px-8 py-3.5 rounded-xl text-white font-medium">
+                            Access Dashboard &#8594;
+                        </button>
+                        <a href="#about" class="btn-outline px-8 py-3.5 rounded-xl text-gray-300 font-medium">
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="glass-card rounded-3xl p-8 floating">
+                        <div class="flex items-center space-x-4 mb-6">
+                            <div
+                                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-2xl">
+                                &#9733;</div>
+                            <div>
+                                <p class="font-bold text-lg">Smart Attendance</p>
+                                <p class="text-gray-400 text-sm">Face Recognition Based</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3 text-sm"><span
+                                    class="text-green-400">&#10003;</span><span class="text-gray-300">Biometric Facial
+                                    Verification</span></div>
+                            <div class="flex items-center space-x-3 text-sm"><span
+                                    class="text-green-400">&#10003;</span><span class="text-gray-300">15-Meter GPS
+                                    Geofencing</span></div>
+                            <div class="flex items-center space-x-3 text-sm"><span
+                                    class="text-green-400">&#10003;</span><span class="text-gray-300">Time-Locked QR
+                                    Tokens</span></div>
+                            <div class="flex items-center space-x-3 text-sm"><span
+                                    class="text-green-400">&#10003;</span><span class="text-gray-300">Real-Time Parent
+                                    Alerts</span></div>
+                            <div class="flex items-center space-x-3 text-sm"><span
+                                    class="text-green-400">&#10003;</span><span class="text-gray-300">Anti-Spoofing
+                                    Detection</span></div>
+                        </div>
+                        <div class="mt-6 pt-6 border-t border-white/10">
+                            <div class="grid grid-cols-3 gap-4 text-center">
+                                <div>
+                                    <p class="text-2xl font-bold text-blue-400">500+</p>
+                                    <p class="text-xs text-gray-500">Students</p>
+                                </div>
+                                <div>
+                                    <p class="text-2xl font-bold text-purple-400">40+</p>
+                                    <p class="text-xs text-gray-500">Faculty</p>
+                                </div>
+                                <div>
+                                    <p class="text-2xl font-bold text-green-400">98%</p>
+                                    <p class="text-xs text-gray-500">Accuracy</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold">About <span class="gradient-text">MET Institute</span></h2>
+                <div class="gradient-line mt-4"></div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card rounded-2xl p-8 achievement-card">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center text-2xl mb-4">
+                        &#127891;</div>
+                    <h3 class="text-lg font-bold mb-3">Our Vision</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">To be a premier institute nurturing future-ready
+                        professionals with technical excellence, managerial acumen, and ethical values for global
+                        leadership.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-8 achievement-card">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center text-2xl mb-4">
+                        &#128640;</div>
+                    <h3 class="text-lg font-bold mb-3">Our Mission</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">To provide industry-aligned education through
+                        innovative curriculum, research-driven pedagogy, and state-of-the-art digital infrastructure.
+                    </p>
+                </div>
+                <div class="glass-card rounded-2xl p-8 achievement-card">
+                    <div class="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center text-2xl mb-4">
+                        &#129309;</div>
+                    <h3 class="text-lg font-bold mb-3">Core Values</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Excellence, Innovation, Integrity, Inclusivity, and
+                        Lifelong Learning - the pillars that define every graduate of MET Institute.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Departments Section -->
+    <section id="departments" class="py-24 bg-white/[0.01] relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold">Our <span class="gradient-text">Departments</span></h2>
+                <div class="gradient-line mt-4"></div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- COMP_APP -->
+                <div class="glass-card rounded-2xl p-8 dept-card achievement-card">
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center text-2xl">
+                            &#128187;</div>
+                        <div>
+                            <h3 class="text-xl font-bold">Computer Application</h3>
+                            <p class="text-blue-400 text-sm">Department of COMP_APP</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white/5">
+                            <span class="text-sm">BCA - Bachelor of Computer Application</span>
+                            <span class="course-badge text-xs px-3 py-1 rounded-full">3 Years | 6 Semesters</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white/5">
+                            <span class="text-sm">MCA - Master of Computer Application</span>
+                            <span class="course-badge text-xs px-3 py-1 rounded-full">2 Years | 4 Semesters</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mt-4 leading-relaxed">Building technocrats with cutting-edge
+                        programming, AI/ML, data science, and software engineering expertise for the digital era.</p>
+                </div>
+                <!-- BUS_ADMIN -->
+                <div class="glass-card rounded-2xl p-8 dept-card achievement-card" style="border-left-color: #8b5cf6;">
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center text-2xl">
+                            &#128202;</div>
+                        <div>
+                            <h3 class="text-xl font-bold">Business Administration</h3>
+                            <p class="text-purple-400 text-sm">Department of BUS_ADMIN</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white/5">
+                            <span class="text-sm">BBA - Bachelor of Business Administration</span>
+                            <span class="course-badge text-xs px-3 py-1 rounded-full"
+                                style="background:rgba(139,92,246,0.1);color:#a78bfa;">3 Years | 6 Semesters</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white/5">
+                            <span class="text-sm">MBA - Master of Business Administration</span>
+                            <span class="course-badge text-xs px-3 py-1 rounded-full"
+                                style="background:rgba(139,92,246,0.1);color:#a78bfa;">2 Years | 4 Semesters</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mt-4 leading-relaxed">Developing future business leaders with
+                        strategic thinking, financial acumen, marketing expertise, and entrepreneurial mindset.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Achievements Section -->
+    <section id="achievements" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold">Institute <span class="gradient-text">Achievements</span>
+                </h2>
+                <div class="gradient-line mt-4"></div>
+            </div>
+            <div class="grid md:grid-cols-4 gap-6 mb-12">
+                <div class="glass-card rounded-2xl p-6 text-center achievement-card">
+                    <p class="stat-number gradient-text">15+</p>
+                    <p class="text-gray-400 text-sm mt-2">Years of Excellence</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 text-center achievement-card">
+                    <p class="stat-number gradient-text">500+</p>
+                    <p class="text-gray-400 text-sm mt-2">Alumni Network</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 text-center achievement-card">
+                    <p class="stat-number gradient-text">100%</p>
+                    <p class="text-gray-400 text-sm mt-2">Placement Assistance</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 text-center achievement-card">
+                    <p class="stat-number gradient-text">50+</p>
+                    <p class="text-gray-400 text-sm mt-2">Industry Partners</p>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="glass-card-light rounded-2xl p-6 flex items-start space-x-4">
+                    <span class="text-2xl">&#127942;</span>
+                    <div>
+                        <h4 class="font-semibold text-sm">Best Emerging Institute 2023</h4>
+                        <p class="text-gray-500 text-xs mt-1">Awarded by Education Excellence Forum for innovative
+                            teaching methodologies.</p>
+                    </div>
+                </div>
+                <div class="glass-card-light rounded-2xl p-6 flex items-start space-x-4">
+                    <span class="text-2xl">&#129518;</span>
+                    <div>
+                        <h4 class="font-semibold text-sm">Smart Campus Initiative</h4>
+                        <p class="text-gray-500 text-xs mt-1">First institute in region to implement AI-powered
+                            attendance and campus management.</p>
+                    </div>
+                </div>
+                <div class="glass-card-light rounded-2xl p-6 flex items-start space-x-4">
+                    <span class="text-2xl">&#128218;</span>
+                    <div>
+                        <h4 class="font-semibold text-sm">Research Publications</h4>
+                        <p class="text-gray-500 text-xs mt-1">Over 100+ research papers published by faculty in
+                            Scopus-indexed journals.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact / Footer -->
+    <section id="contact" class="py-16 bg-white/[0.01] border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold">
+                            M</div>
+                        <span class="font-bold text-lg">MET Institute</span>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed">Empowering the next generation of technologists and
+                        business leaders through innovative education.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Quick Links</h4>
+                    <div class="space-y-2 text-sm text-gray-400">
+                        <a href="#home" class="block hover:text-white">Home</a>
+                        <a href="#about" class="block hover:text-white">About Us</a>
+                        <a href="#departments" class="block hover:text-white">Departments</a>
+                        <a href="#achievements" class="block hover:text-white">Achievements</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Contact</h4>
+                    <div class="space-y-2 text-sm text-gray-400">
+                        <p>MET Institute of Management</p>
+                        <p>Nashik, Maharashtra, India</p>
+                        <p>Email: iom@bkc.met.edu</p>
+                        <p class="text-xs mt-4 text-gray-600">&#169; 2026 MET Institute. All rights reserved.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50">
+        <div
+            class="bg-slate-900 rounded-3xl p-8 w-full max-w-md border border-white/10 mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-xl font-bold">Staff & Student Login</h3>
+                    <p class="text-gray-400 text-xs mt-1">Use your @met.edu email to sign in</p>
+                </div>
+                <button onclick="document.getElementById('loginModal').classList.add('hidden')"
+                    class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white">&times;</button>
+            </div>
+            <form id="loginForm" class="space-y-4">
+                <div id="errorMessage"
+                    class="hidden bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm error-toast">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-300 mb-1">Email Address</label>
+                    <input type="email" id="email" required placeholder="your.name@met.edu"
+                        class="input-field w-full px-4 py-3.5 rounded-xl text-white placeholder-gray-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-300 mb-1">Password</label>
+                    <input type="password" id="password" required placeholder="Enter your password"
+                        class="input-field w-full px-4 py-3.5 rounded-xl text-white placeholder-gray-500">
+                </div>
+                <button type="submit" id="loginBtn"
+                    class="btn-primary w-full py-3.5 rounded-xl text-white font-semibold text-sm">Sign In</button>
+            </form>
+            <div class="mt-6 pt-4 border-t border-white/10 text-center">
+                <p class="text-gray-500 text-xs">Authorized access only. All activities are monitored.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const loginBtn = document.getElementById('loginBtn');
+            errorDiv.classList.add('hidden');
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mx-auto" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>';
+            try {
+                const res = await fetch('/api/login/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+                const data = await res.json();
+                if (data.success) {
+                    sessionStorage.setItem('session_token', data.session_token);
+                    sessionStorage.setItem('user', JSON.stringify(data.user));
+                    // Pass the session token as a query param so the dashboard can validate it server-side
+                    window.location.href = data.redirect_url + '?token=' + encodeURIComponent(data.session_token);
+                } else {
+                    errorDiv.textContent = data.error || 'Login failed. Check your credentials.';
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Network error. Please try again.';
+                errorDiv.classList.remove('hidden');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+            }
+        });
+    </script>
+</body>
+
+</html>

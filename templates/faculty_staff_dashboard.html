@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard - MET Smart Attendance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #0f172a;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .input-dark {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .input-dark:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        #qrcode {
+            display: inline-block;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        #qrcode img {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .gps-indicator {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .gps-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .gps-dot.active {
+            background: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .gps-dot.inactive {
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .timer {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-white p-6">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <div class="flex items-center space-x-3">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-lg">
+                        M</div>
+                    <div>
+                        <h1 class="text-xl font-bold">Faculty Dashboard</h1>
+                        <p class="text-gray-400 text-sm" id="facultyInfo">Loading...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="gps-indicator">
+                    <span class="gps-dot inactive" id="gpsDot"></span>
+                    <span class="text-xs text-gray-400" id="gpsStatus">GPS: Inactive</span>
+                </div>
+                <button onclick="logout()"
+                    class="px-4 py-2 rounded-xl text-red-400 hover:bg-red-500/10 text-sm">Logout</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Panel: Subject Selection & GPS -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="card p-6">
+                    <h3 class="font-semibold mb-4">Session Setup</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Select Subject</label>
+                            <select id="subjectSelect" class="input-dark w-full px-4 py-3 rounded-xl outline-none">
+                                <option value="">-- Select Subject --</option>
+
+
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Course</label>
+                            <select id="courseSelect" class="input-dark w-full px-4 py-3 rounded-xl outline-none">
+                                <option value="BCA">BCA</option>
+                                <option value="MCA">MCA</option>
+                                <option value="BBA">BBA</option>
+                                <option value="MBA">MBA</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Semester</label>
+                            <select id="semesterSelect"
+                                class="input-dark w-full px-4 py-3 rounded-xl outline-none"></select>
+                        </div>
+                        <button onclick="captureGPS()"
+                            class="btn-success w-full py-3 rounded-xl text-white text-sm font-medium">
+                            &#9678; Capture GPS Location
+                        </button>
+                        <div id="gpsCoords" class="text-xs text-gray-500 hidden p-3 bg-white/5 rounded-xl">
+                            <p>Lat: <span id="gpsLat">-</span></p>
+                            <p>Lng: <span id="gpsLng">-</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="font-semibold mb-4">Session History</h3>
+                    <div id="sessionHistory" class="space-y-2 text-sm text-gray-400">
+                        <p>No active sessions</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: QR Code & Status -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="card p-6 text-center">
+                    <h3 class="font-semibold mb-2">Active Attendance QR Code</h3>
+                    <p class="text-xs text-gray-400 mb-4">Students scan this QR code to mark attendance</p>
+                    <div id="qrContainer" class="flex flex-col items-center">
+                        <div id="qrcode" class="mb-4">
+                            <p class="text-gray-400 text-sm py-8">Configure session and capture GPS to generate QR</p>
+                        </div>
+                        <div id="qrTokenDisplay" class="hidden">
+                            <p class="text-xs text-gray-500 mb-2">Token: <span id="qrTokenValue"
+                                    class="text-blue-400 font-mono"></span></p>
+                            <a id="qrLink" href="#" target="_blank"
+                                class="text-xs text-blue-400 underline break-all mt-1 block"></a>
+                            <div class="flex items-center justify-center space-x-2">
+                                <span class="text-xs text-gray-400">Expires in:</span>
+                                <span class="timer" id="countdownTimer">120</span>
+                                <span class="text-xs text-gray-400">s</span>
+                            </div>
+                            <div class="w-full bg-white/10 rounded-full h-2 mt-2">
+                                <div id="progressBar" class="bg-blue-500 h-2 rounded-full transition-all duration-1000"
+                                    style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="generateQRBtn" onclick="generateQR()"
+                        class="btn-primary mt-4 px-8 py-3 rounded-xl text-white text-sm font-medium" disabled>
+                        &#9889; Generate QR Code
+                    </button>
+                    <button id="stopSessionBtn" onclick="stopSession()"
+                        class="btn-danger mt-2 px-8 py-3 rounded-xl text-white text-sm font-medium hidden">
+                        &#9632; Stop Session
+                    </button>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="font-semibold mb-4">Recent Scans</h3>
+                    <div id="recentScans" class="space-y-2">
+                        <p class="text-gray-500 text-sm text-center py-4">No scans yet. Start a session to see live
+                            updates.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let user = JSON.parse(sessionStorage.getItem('user') || '{}');
+        let currentPosition = null;
+        let currentQRToken = null;
+        let countdownInterval = null;
+        let sessionActive = false;
+        let department = user.department || 'COMP_APP';
+
+        document.getElementById('facultyInfo').textContent = `${user.name || 'Faculty'} | ${department}`;
+
+        function logout() { sessionStorage.clear(); window.location.href = '/'; }
+
+        // Initialize semester dropdown
+        function updateSemesters(course) {
+            const sel = document.getElementById('semesterSelect');
+            sel.innerHTML = '';
+            const sems = course === 'BCA' ? ['BCA_1', 'BCA_2', 'BCA_3', 'BCA_4', 'BCA_5', 'BCA_6']
+                : course === 'MCA' ? ['MCA_1', 'MCA_2', 'MCA_3', 'MCA_4']
+                    : course === 'BBA' ? ['BBA_1', 'BBA_2', 'BBA_3', 'BBA_4', 'BBA_5', 'BBA_6']
+                        : ['MBA_1', 'MBA_2', 'MBA_3', 'MBA_4'];
+            sems.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s.replace('_', ' '); sel.appendChild(o); });
+        }
+        updateSemesters('MCA');
+        document.getElementById('courseSelect').addEventListener('change', function () { updateSemesters(this.value); });
+
+        // Load subjects
+        async function loadSubjects() {
+            const sel = document.getElementById('subjectSelect');
+            sel.innerHTML = '<option value="">-- Select Subject --</option>';
+            try {
+                const res = await fetch(`/api/subjects/?department=${department}`);
+                const data = await res.json();
+                if (data.subjects) {
+                    data.subjects.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.code;
+                        opt.textContent = `${s.name} (${s.code}) - ${s.course} ${s.semester.replace('_', ' ')}`;
+                        opt.dataset.course = s.course;
+                        opt.dataset.semester = s.semester;
+                        sel.appendChild(opt);
+                    });
+                }
+            } catch (err) { console.error(err); }
+        }
+        loadSubjects();
+
+        // GPS Capture
+        function captureGPS() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
+            }
+            document.getElementById('gpsStatus').textContent = 'GPS: Acquiring...';
+            document.getElementById('gpsDot').className = 'gps-dot inactive';
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    currentPosition = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    };
+                    document.getElementById('gpsLat').textContent = currentPosition.lat.toFixed(6);
+                    document.getElementById('gpsLng').textContent = currentPosition.lng.toFixed(6);
+                    document.getElementById('gpsCoords').classList.remove('hidden');
+                    document.getElementById('gpsStatus').textContent = 'GPS: Active';
+                    document.getElementById('gpsDot').className = 'gps-dot active';
+                    checkReadyState();
+                },
+                (error) => {
+                    document.getElementById('gpsStatus').textContent = `GPS: Error (${error.message})`;
+                    document.getElementById('gpsDot').className = 'gps-dot inactive';
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+
+        function checkReadyState() {
+            const subject = document.getElementById('subjectSelect').value;
+            const hasGPS = currentPosition !== null;
+            const btn = document.getElementById('generateQRBtn');
+            btn.disabled = !(subject && hasGPS && !sessionActive);
+            if (!btn.disabled) {
+                btn.classList.remove('opacity-50');
+            } else {
+                btn.classList.add('opacity-50');
+            }
+        }
+
+        document.getElementById('subjectSelect').addEventListener('change', checkReadyState);
+
+        // Generate QR Code
+        async function generateQR() {
+            const subjectCode = document.getElementById('subjectSelect').value;
+            const course = document.getElementById('courseSelect').value;
+            const semester = document.getElementById('semesterSelect').value;
+
+            if (!subjectCode || !currentPosition) {
+                alert('Please select a subject and capture GPS location first.');
+                return;
+            }
+
+            const btn = document.getElementById('generateQRBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="animate-spin h-5 w-5 mx-auto" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>';
+
+            try {
+                const res = await fetch('/api/qr/generate/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        faculty_id: user._id,
+                        subject: subjectCode,
+                        department: department,
+                        course: course,
+                        semester: semester,
+                        latitude: currentPosition.lat,
+                        longitude: currentPosition.lng,
+                        expiry_seconds: 120,
+                    }),
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentQRToken = data.qr_token;
+                    sessionActive = true;
+
+                    // Generate QR Code with network-accessible URL
+                    const qrContainer = document.getElementById('qrcode');
+                    qrContainer.innerHTML = '<p class="text-gray-400 text-sm py-8">Generating QR...</p>';
+                    // Build fallback URL first
+                    const fallbackUrl = window.location.origin + '/checkin/?qr_token=' + encodeURIComponent(currentQRToken) + '&subject=' + encodeURIComponent(subjectCode);
+                    // Try to get network IP for phone scanning
+                    fetch('/api/hostname/').then(r => r.json()).then(d => {
+                        const ipUrl = 'http://' + d.ip + ':8000/checkin/?qr_token=' + encodeURIComponent(currentQRToken) + '&subject=' + encodeURIComponent(subjectCode);
+                        makeQR(ipUrl);
+                    }).catch(() => {
+                        makeQR(fallbackUrl);
+                    });
+
+                    function makeQR(url) {
+                        qrContainer.innerHTML = '';
+                        new QRCode(qrContainer, { text: url, width: 200, height: 200, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+                        document.getElementById('qrLink').textContent = url;
+                        document.getElementById('qrLink').href = url;
+                    }
+
+                    document.getElementById('qrTokenValue').textContent = currentQRToken;
+                    document.getElementById('qrTokenDisplay').classList.remove('hidden');
+                    document.getElementById('stopSessionBtn').classList.remove('hidden');
+                    btn.classList.add('hidden');
+
+                    // Start countdown
+                    startCountdown(120);
+
+                    // Add to session history
+                    addSessionHistory(subjectCode, course, semester);
+
+                    // Start polling for scans
+                    startScanPolling();
+                } else {
+                    alert('Error: ' + data.error);
+                    btn.disabled = false;
+                    btn.innerHTML = '&#9889; Generate QR Code';
+                }
+            } catch (err) {
+                alert('Network error');
+                btn.disabled = false;
+                btn.innerHTML = '&#9889; Generate QR Code';
+            }
+        }
+
+        function startCountdown(seconds) {
+            let remaining = seconds;
+            const timerEl = document.getElementById('countdownTimer');
+            const progressBar = document.getElementById('progressBar');
+
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            countdownInterval = setInterval(() => {
+                remaining--;
+                timerEl.textContent = remaining;
+                progressBar.style.width = `${(remaining / seconds) * 100}%`;
+
+                if (remaining <= 0) {
+                    clearInterval(countdownInterval);
+                    sessionActive = false;
+                    document.getElementById('generateQRBtn').classList.remove('hidden');
+                    document.getElementById('stopSessionBtn').classList.add('hidden');
+                    document.getElementById('qrTokenDisplay').classList.add('hidden');
+                    document.getElementById('generateQRBtn').disabled = false;
+                    document.getElementById('generateQRBtn').innerHTML = '&#9889; Generate QR Code';
+                    document.getElementById('generateQRBtn').classList.remove('opacity-50');
+                }
+            }, 1000);
+        }
+
+        function stopSession() {
+            if (countdownInterval) clearInterval(countdownInterval);
+            sessionActive = false;
+            currentQRToken = null;
+            document.getElementById('generateQRBtn').classList.remove('hidden');
+            document.getElementById('stopSessionBtn').classList.add('hidden');
+            document.getElementById('qrTokenDisplay').classList.add('hidden');
+            document.getElementById('generateQRBtn').disabled = false;
+            document.getElementById('generateQRBtn').innerHTML = '&#9889; Generate QR Code';
+            document.getElementById('generateQRBtn').classList.remove('opacity-50');
+            document.getElementById('qrcode').innerHTML = '<p class="text-gray-400 text-sm py-8">Session stopped</p>';
+        }
+
+        function addSessionHistory(subject, course, semester) {
+            const container = document.getElementById('sessionHistory');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'p-3 bg-white/5 rounded-xl text-xs';
+            entry.innerHTML = `<span class="text-green-400">&#9679;</span> ${subject} | ${course} ${semester.replace('_', ' ')} | ${time}`;
+            container.prepend(entry);
+        }
+
+        function startScanPolling() {
+            // Poll for recent attendance logs for this session
+            const pollInterval = setInterval(async () => {
+                if (!sessionActive) {
+                    clearInterval(pollInterval);
+                    return;
+                }
+                try {
+                    const res = await fetch(`/api/attendance/trend/?subject=${document.getElementById('subjectSelect').value}&department=${department}&course=${document.getElementById('courseSelect').value}&semester=${document.getElementById('semesterSelect').value}&days=1`);
+                    const data = await res.json();
+                    if (data.trend && data.trend.length > 0) {
+                        const latest = data.trend[data.trend.length - 1];
+                        document.getElementById('recentScans').innerHTML = `
+                            <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl">
+                                <span class="text-sm">Today's Attendance</span>
+                                <span class="text-sm font-semibold text-green-400">${latest.present} Present</span>
+                            </div>
+                            <p class="text-xs text-gray-500 text-center">${latest.total} total records</p>`;
+                    }
+                } catch (err) { /* ignore polling errors */ }
+            }, 5000);
+        }
+
+        // Initialize
+        checkReadyState();
+    </script>
+</body>
+
+</html>

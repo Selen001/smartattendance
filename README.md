@@ -80,8 +80,6 @@ python -m venv .venv
 # Activate virtual environment
 # On Windows (PowerShell):
 .venv\Scripts\Activate.ps1
-# On Linux/macOS:
-source .venv/bin/activate
 
 # Install required packages
 pip install -r requirements.txt
@@ -113,7 +111,7 @@ Visit the application in your browser at `http://127.0.0.1:8000/`.
 
 Use these accounts to explore the various dashboards after running the seed scripts:
 
-*   **Super Admin**:
+*   **Admin**:
     *   **Email**: `admin@met.edu`
     *   **Password**: `Admin@MET2026`
 

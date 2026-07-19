@@ -4,10 +4,10 @@ A state-of-the-art, secure, and multi-tenant Smart Attendance Management System 
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
 *   **Multi-Role Dashboards**:
-    *   **Super Admin**: Manage system tiers, view global usage stats, manage departments/users, and oversee billing and configuration.
+    *   **Admin**: Manage system tiers, view global usage stats, manage departments/users, and oversee billing and configuration.
     *   **Faculty Head**: Access department-wide attendance logs, monitor subject trends, and manage subjects/staff.
     *   **Faculty Staff**: Generate dynamic, time-limited QR codes for classes, start attendance sessions, and view class trends.
     *   **Student**: Scan class QR codes, submit face verification photos, and view real-time personal attendance logs.
@@ -24,7 +24,7 @@ A state-of-the-art, secure, and multi-tenant Smart Attendance Management System 
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 *   **Backend**: Python, Django, Django REST Framework (DRF)
 *   **Database**: MongoDB (via `pymongo` with thread-safe connection pooling)
@@ -36,7 +36,7 @@ A state-of-the-art, secure, and multi-tenant Smart Attendance Management System 
 
 ---
 
-## 📂 Project Directory Structure
+##  Project Directory Structure
 
 ```text
 smartattendance/
@@ -57,7 +57,7 @@ smartattendance/
 
 ---
 
-## ⚙️ Setup and Installation
+##  Setup and Installation
 
 ### 1. Prerequisites
 Ensure you have the following installed on your machine:
@@ -109,7 +109,7 @@ Visit the application in your browser at `http://127.0.0.1:8000/`.
 
 ---
 
-## 🔑 Seeded Credentials for Testing
+##  Seeded Credentials for Testing
 
 Use these accounts to explore the various dashboards after running the seed scripts:
 
@@ -119,7 +119,7 @@ Use these accounts to explore the various dashboards after running the seed scri
 
 ---
 
-## 🔒 Security Best Practices
+##  Security Best Practices
 
 1.  **Secret Keys**: In production, do not commit raw keys. Populate `DJANGO_SECRET_KEY` and `MONGO_URI` via environment variables.
 2.  **HTTPS**: Ensure HTTPS is enabled when deploying to secure geolocation and webcam feed inputs in browser windows.
